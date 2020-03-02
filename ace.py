@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def ace(pixel, spray, diversity):
+def ace(pixel, spray):
     """
     Calculates ACE for target pixel *pixel* following:
 
@@ -18,7 +18,9 @@ def ace(pixel, spray, diversity):
     :return: ACE for target pixel
     """
     diffs = pixel - spray
-    slope = 1.0 / diversity
+
+    spray[spray == 0] = np.min(spray[np.nonzero(spray)])
+    slope = np.max(spray, axis=0, keepdims=True) / np.min(spray, axis=0, keepdims=True)
 
     threshold = 1.0 / (2 * slope)
     c1 = diffs <= -threshold
