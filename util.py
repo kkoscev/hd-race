@@ -63,10 +63,10 @@ def naka_rushton_2(image):
     """
     image_ = image.copy()
 
-    image_[image == 0] = np.min(image[image_ > 0])
+    image_[image == 0] = np.min(image_[np.nonzero(image_)])
 
-    luminance = np.max(image_, axis=-1)
-    return image / (np.exp(np.mean(np.log(luminance), keepdims=True)) + np.tile(luminance[..., np.newaxis], (1, 1, 3)))
+    l = np.max(image_, axis=-1, keepdims=True)
+    return image / (np.exp(np.mean(np.log(l))) + l)
 
 
 def get_image_name(image_path):
