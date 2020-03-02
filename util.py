@@ -46,6 +46,10 @@ def make_spray(x_0, y_0, n, R):
     return points[:n, 0], points[:n, 1]
 
 
+def naka_rushton_1(image):
+    return image / (image + np.sqrt(image_geomean(image) * image_mean(image)))
+
+
 def naka_rushton_2(image):
     """
     Applies Naka-Rushton equation on the input image:
@@ -122,3 +126,23 @@ def read_image(image_path, dtype=None):
         image = image.astype(dtype)
 
     return image
+
+
+def image_geomean(image):
+    gm = np.zeros((1, 1, 3))
+    for c in [0, 1, 2]:
+        channel = image[..., c]
+        channel = channel[channel > 0]
+        gm[..., c] = np.exp((1.0 / len(channel)) * np.sum(np.log(channel)))
+
+    return gm
+
+
+def image_mean(image):
+    return np.mean(image, axis=(0, 1), keepdims=True)
+
+
+naka_rushton = {
+    1: naka_rushton_1,
+    2: naka_rushton_2
+}
