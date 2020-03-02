@@ -1,5 +1,6 @@
-output
+output*
 data
 exp_*
 __pycache__
 .idea
+*.txt
