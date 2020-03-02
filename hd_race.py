@@ -28,7 +28,6 @@ def hd_race(image, N, n, upper_bound=255.0):
 
     padded_image = util.add_padding(image)
     padded_naka_rushton_image = util.add_padding(naka_rushton_image)
-    padded_blurred_image = util.add_padding(blurred_image)
 
     total_pixels = image_height * image_width * N
     current_index = 0
@@ -38,17 +37,13 @@ def hd_race(image, N, n, upper_bound=255.0):
                 spray_cols, spray_rows = util.make_spray(col, row, n, max_spray_radius)
                 spray_cols, spray_rows = spray_cols + image_width, spray_rows + image_height
 
-                div_spray_pixels = padded_blurred_image[spray_rows, spray_cols, :]
-                diversity = np.min(div_spray_pixels, axis=0, keepdims=True) / np.max(div_spray_pixels, axis=0,
-                                                                                     keepdims=True)
-
                 spray_pixels = padded_image[spray_rows, spray_cols, :]
                 nr_spray_pixels = padded_naka_rushton_image[spray_rows, spray_cols, :]
                 current_pixel = image[row, col, :]
                 nr_current_pixel = naka_rushton_image[row, col, :]
 
                 L_rsr[row, col] = L_rsr[row, col] + rsr(current_pixel, spray_pixels)
-                L_ace[row, col] = L_ace[row, col] + ace(nr_current_pixel, nr_spray_pixels, diversity)
+                L_ace[row, col] = L_ace[row, col] + ace(nr_current_pixel, nr_spray_pixels)
 
                 current_index += 1
                 print('Progress {:3.2f}%'.format(100 * current_index / total_pixels), end='\r')
