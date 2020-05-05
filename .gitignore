@@ -1,6 +1,10 @@
 output*
-data
+hdr_data
+ldr_data
+display
+output_nr_rsr
 exp_*
 __pycache__
 .idea
 *.txt
+venv
