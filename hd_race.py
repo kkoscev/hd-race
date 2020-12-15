@@ -60,7 +60,7 @@ def hd_race(image, N, n, upper_bound=255.0):
     beta = util.gaussian(log_lum, np.max(log_lum), sb * np.max(log_lum))
     gamma = util.gaussian(log_lum, np.max(log_lum), sg * sb * np.max(log_lum))
 
-    L = util.convex_comb(L_rsr, L_nrace, alpha=gamma)
+    L = util.convex_comb(L_rsr, L_nrrsr, alpha=gamma)
     L = util.convex_comb(L, L_nrace, alpha=beta)
 
     L = util.to_uint8(util.scale(util.clip(L, 1), upper_bound))
