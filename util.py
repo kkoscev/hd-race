@@ -52,14 +52,18 @@ def make_spray(center_x, center_y, n_pts, max_radius, t=None):
     return points[:n_pts]
 
 
-def naka_rushton(image):
+def naka_rushton(image, p=0.5):
     """
-    Normalizes the input image using Naka-Rushton equation.
+    Normalizes the input image by using the Naka-Rushton equation.
 
     :param image: input image
+    :param p: controls contribution of the arithmetic and geometric image average values. If p < 0.5 more weight is
+    given to geometric average. If p > 0.5 more weight is given to arithmetic average. If p = 1.5 both arithmetic and
+    geometric mean have the same contribution.
     :return: normalized image
     """
-    return image / (image + np.sqrt(image_geomean(image) * image_mean(image)))
+
+    return image / (image + np.power(image_mean(image), p) * np.power(image_geomean(image), 1 - p))
 
 
 def get_name(filepath):
@@ -72,32 +76,32 @@ def get_name(filepath):
     return os.path.splitext(os.path.basename(filepath))[0]
 
 
-def add_padding(image):
+def mirror_expand(image):
     """
-    Adds padding to the input image by mirroring the image in vertical, horizontal, and diagonal direction.
+    Expands the input image by mirroring the image in vertical, horizontal, and diagonal direction.
     :param image: input image
-    :return: padded image
+    :return: expanded image
     """
-    image_height, image_width, n_channels = image.shape[:3]
+    img_h, img_w, img_d = image.shape[:3]
 
-    padded_image = np.ones((3 * image_height, 3 * image_width, n_channels))
+    mirrored_img = np.ones((3 * img_h, 3 * img_w, img_d))
 
-    padded_image[:image_height, :image_width, :] = np.flipud(np.fliplr(image))
-    padded_image[:image_height, image_width:2 * image_width, :] = np.flipud(image)
-    padded_image[:image_height, 2 * image_width:, :] = np.flipud(np.fliplr(image))
+    mirrored_img[:img_h, :img_w, :] = np.flipud(np.fliplr(image))
+    mirrored_img[:img_h, img_w:2 * img_w, :] = np.flipud(image)
+    mirrored_img[:img_h, 2 * img_w:, :] = np.flipud(np.fliplr(image))
 
-    padded_image[image_height:2 * image_height, :image_width, :] = np.fliplr(image)
-    padded_image[image_height:2 * image_height, image_width:2 * image_width, :] = image
-    padded_image[image_height:2 * image_height, 2 * image_width:, :] = np.fliplr(image)
+    mirrored_img[img_h:2 * img_h, :img_w, :] = np.fliplr(image)
+    mirrored_img[img_h:2 * img_h, img_w:2 * img_w, :] = image
+    mirrored_img[img_h:2 * img_h, 2 * img_w:, :] = np.fliplr(image)
 
-    padded_image[2 * image_height:, :image_width, :] = np.flipud(np.fliplr(image))
-    padded_image[2 * image_height:, image_width:2 * image_width, :] = np.flipud(image)
-    padded_image[2 * image_height:, 2 * image_width:, :] = np.flipud(np.fliplr(image))
+    mirrored_img[2 * img_h:, :img_w, :] = np.flipud(np.fliplr(image))
+    mirrored_img[2 * img_h:, img_w:2 * img_w, :] = np.flipud(image)
+    mirrored_img[2 * img_h:, 2 * img_w:, :] = np.flipud(np.fliplr(image))
 
-    return padded_image
+    return mirrored_img
 
 
-def read_image(image_path, dtype=None, cvtColor=cv2.COLOR_BGR2RGB):
+def imread(image_path, dtype=None, cvtColor=cv2.COLOR_BGR2RGB):
     """
     Loads an image at specified path. If the the image can not be read (because of missing file,
     improper permissions, unsupported or invalid format) then this method returns an empty matrix.
@@ -167,16 +171,48 @@ def write_tmo_outputs(folder):
         os.makedirs(output_dir)
 
     for rsr_file, nr_rsr_file, nr_ace_file in zip(rsr_files, nr_rsr_files, nr_ace_files):
-        rsr_image = read_image(os.path.join(rsr_folder, rsr_file), dtype=np.uint8)
-        nr_rsr_image = read_image(os.path.join(nr_rsr_folder, nr_rsr_file), dtype=np.uint8)
-        nr_ace_image = read_image(os.path.join(nr_ace_folder, nr_ace_file), dtype=np.uint8)
+        rsr_image = imread(os.path.join(rsr_folder, rsr_file), dtype=np.uint8, cvtColor=None)
+        nr_rsr_image = imread(os.path.join(nr_rsr_folder, nr_rsr_file), dtype=np.uint8, cvtColor=None)
+        nr_ace_image = imread(os.path.join(nr_ace_folder, nr_ace_file), dtype=np.uint8, cvtColor=None)
 
         h, w, d = rsr_image.shape
         spacing = 5
-        display_image = np.ones((h, 3 * w + 2 * spacing, credits()), dtype=np.uint8) * 255
+        display_image = np.ones((h, 3 * w + 2 * spacing, d), dtype=np.uint8) * 255
 
         display_image[:, :w, :] = rsr_image
         display_image[:, w + spacing:2 * w + spacing, :] = nr_rsr_image
         display_image[:, 2 * (w + spacing):, :] = nr_ace_image
 
-        cv2.imwrite(os.path.join(output_dir, os.path.splitext(rsr_file)[0]), display_image)
+        cv2.imwrite(os.path.join(output_dir, rsr_file), display_image)
+
+
+def to_uint8(data):
+    return data.astype(np.uint8)
+
+
+def clip(data, upper_bound):
+    return np.clip(data, a_min=0, a_max=upper_bound)
+
+
+def scale(image, factor):
+    return image * factor
+
+
+def gaussian(x, mean, sigma):
+    return np.exp(- (x - mean) ** 2.0 / (2.0 * sigma ** 2.0))
+
+
+def to_log_lum(image, zero_origin=False):
+    lum = np.mean(image, axis=-1, keepdims=True)
+    log_lum = np.log10(lum)
+    if zero_origin:
+        log_lum = log_lum - np.min(log_lum)
+
+    return log_lum
+
+
+def convex_comb(x, y, alpha):
+    return alpha * x + (1.0 - alpha) * y
+
+
+write_tmo_outputs('ldr_data/sprays_10')

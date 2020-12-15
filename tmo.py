@@ -69,7 +69,7 @@ def apply_tmo(tmo, image, n_sprays=10, n_pts=None, naka_rushton=False):
     if naka_rushton:
         image = util.naka_rushton(image.copy())
 
-    padded_image = util.add_padding(image)
+    padded_image = util.mirror_expand(image)
 
     total_pixels = image_height * image_width * n_sprays
     current_index = 0
@@ -136,7 +136,7 @@ def process_path(image_path, operation, output_folder, n_sprays, n_pts, naka_rus
     :param naka_rushton: if True, input image is normalized using Naka-Rushton equation
     """
     print('Processing {}'.format(image_path))
-    image = util.read_image(image_path, dtype=np.float32)
+    image = util.imread(image_path, dtype=np.float32)
     L = operation(image, n_sprays=n_sprays, n_pts=n_pts, naka_rushton=naka_rushton)
     cv2.imwrite(os.path.join(output_folder, '{}.png'.format(os.path.splitext(os.path.basename(image_path))[0])),
                 cv2.cvtColor(L, cv2.COLOR_RGB2BGR))
