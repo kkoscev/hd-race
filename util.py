@@ -202,8 +202,11 @@ def gaussian(x, mean, sigma):
     return np.exp(- (x - mean) ** 2.0 / (2.0 * sigma ** 2.0))
 
 
-def to_log_lum(image, zero_origin=False):
+def to_loglum(image, blur=False, zero_origin=False):
     lum = np.mean(image, axis=-1, keepdims=True)
+    if blur:
+        lum = cv2.GaussianBlur(lum, (25, 25), 0)
+
     log_lum = np.log10(lum)
     if zero_origin:
         log_lum = log_lum - np.min(log_lum)
