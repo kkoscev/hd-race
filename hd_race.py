@@ -21,7 +21,7 @@ def hd_race(image, N, n, upper_bound=255.0):
     max_spray_r = min(img_h, img_w)
 
     nr_img = util.naka_rushton(image.copy())
-    blurred_img = cv2.GaussianBlur(image, (25, 25), 0)[..., np.newaxis]
+    blurred_img = cv2.GaussianBlur(image, (25, 25), 0)
 
     mirrored_img = util.mirror_expand(image)
     mirrored_nr_img = util.mirror_expand(nr_img)
