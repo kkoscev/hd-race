@@ -34,8 +34,7 @@ def hd_race(image, N, n, upper_bound=255.0):
     for row in range(img_h):
         for col in range(img_w):
             for _ in range(N):
-                spray_cols, spray_rows = util.make_spray(col, row, n, max_spray_r)
-                spray_cols, spray_rows = spray_cols + img_w, spray_rows + img_h
+                spray_cols, spray_rows = util.make_spray(col, row, n, max_spray_r, (img_w, img_h))
 
                 center_pixel = image[row, col]
                 nr_center_pixel = nr_img[row, col]
