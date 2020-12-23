@@ -63,7 +63,7 @@ def naka_rushton(image, p=0.5):
     :return: normalized image
     """
 
-    return image / (image + np.power(image_mean(image), p) * np.power(image_geomean(image), 1 - p))
+    return image / (image + np.power(immean(image), p) * np.power(imgeomean(image), 1 - p))
 
 
 def get_name(filepath):
@@ -124,9 +124,9 @@ def imread(image_path, dtype=None, cvtColor=cv2.COLOR_BGR2RGB):
     return image
 
 
-def image_geomean(image):
+def imgeomean(image):
     """
-    Computes geometric average for each channel of RGB image.
+    Computes geometric average for each channel of an RGB image.
 
     :param image: input image
     :return: geometric average
@@ -140,9 +140,9 @@ def image_geomean(image):
     return gm
 
 
-def image_mean(image):
+def immean(image):
     """
-    Computes arithmetic average for each channel of RGB image.
+    Computes arithmetic average for each channel of an RGB image.
 
     :param image: input image
     :return: arithmetic average
@@ -153,7 +153,7 @@ def image_mean(image):
 def write_tmo_outputs(folder):
     """
     Looks for *rsr*, *nr_rsr*, *nr_ace* folders that are direct children of *folder* folder. Images which are found in
-    all three folders are combined into one image for display. This images is written into *display* folder with is a
+    all three folders are combined into one image for display. This images is written into *display* folder which is a
     direct child of *folder* folder with the same name as input images.
 
     :param folder: data folder
@@ -216,6 +216,3 @@ def to_loglum(image, blur=False, zero_origin=False):
 
 def convex_comb(x, y, alpha):
     return alpha * x + (1.0 - alpha) * y
-
-
-write_tmo_outputs('ldr_data/sprays_10')
