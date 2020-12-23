@@ -8,3 +8,6 @@ __pycache__
 .idea
 *.txt
 venv
+test.py
+data/*
+!data/hdr/
