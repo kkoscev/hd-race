@@ -33,12 +33,12 @@ def hd_race(image, N, n, upper_bound=255.0):
     for row in range(img_h):
         for col in range(img_w):
             for _ in range(N):
-                spray_cols, spray_rows = util.make_spray(col, row, n, max_spray_r, (img_w, img_h))
+                spray_pos = util.make_spray(col, row, n, max_spray_r, (img_w, img_h))
 
                 center_pixel = image[row, col]
                 nr_center_pixel = nr_img[row, col]
-                spray = mirrored_img[spray_rows, spray_cols]
-                nr_spray = mirrored_nr_img[spray_rows, spray_cols]
+                spray = mirrored_img[spray_pos[:, 1], spray_pos[:, 0]]
+                nr_spray = mirrored_nr_img[spray_pos[:, 1], spray_pos[:, 0]]
 
                 L_rsr[row, col] = L_rsr[row, col] + rsr(center_pixel, spray)
                 L_nrrsr[row, col] = L_nrrsr[row, col] + rsr(nr_center_pixel, nr_spray)
